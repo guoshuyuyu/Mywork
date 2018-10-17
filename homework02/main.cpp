@@ -98,6 +98,7 @@ private:
     QString tempFile;
     QVector<studData> student;
     studData list;
+    QList<studData> data;
 };
 
  ScoreSorter::ScoreSorter(QString dataFile)
@@ -107,11 +108,11 @@ private:
 void ScoreSorter::doSort(){
     for(int i=1;i<this->list.stud.size();i++){
     myCmp cmp(i-1);
-    std::sort(this->dataFile.begin(),this->dataFile.end(),cmp );
+    std::sort(this->data.begin(),this->data.end(),cmp );
     qDebug()<<"排序后输出，当前排序第"<<i+1<<"列";
     qDebug() << ""<< (this->list)<<"\t";
-    for(int i=0;i<this->dataFile.size();i++)
-    qDebug() << this->dataFile.at(i)<<"\t";
+    for(int i=0;i<this->data.size();i++)
+    qDebug() << this->data.at(i)<<"\t";
     qDebug()<<"-------------------------------------\n";
     }
 }
@@ -120,7 +121,6 @@ void ScoreSorter::readFile(){
     QFile file(tempFile);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         qDebug()<<QString("文件打开失败").arg(tempFile);
-    return -1;
     }
     while(!file.atEnd()){
         QString line=file.readLine();
@@ -167,4 +167,4 @@ int main()
     s.doSort();
     return 0;
 }
-}
+
