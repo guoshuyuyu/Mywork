@@ -97,7 +97,6 @@ public:
 private:
     QString tempFile;
     QVector<studData> student;
-    void writeFile(quint8 lie);
     studData list;
 };
 
@@ -114,7 +113,6 @@ void ScoreSorter::doSort(){
     for(int i=0;i<this->dataFile.size();i++)
     qDebug() << this->dataFile.at(i)<<"\t";
     qDebug()<<"-------------------------------------\n";
-    this->writeFile(i+1);
     }
 }
 
@@ -130,25 +128,6 @@ void ScoreSorter::readFile(){
     }
                   file.close();
         qDebug().noquote().nospace()<<"文件读取完成："<<tempFile;
-    }
-    void ScoreSorter::writeFile(quint8 lie){
-        QFile file("sorted_"+this->tempFile);
-        file.open(QIODevice::ReadWrite | QIODevice::Append);
-        QTextStream stream(&file);
-        stream.setCodec("UTF-8");
-        stream<<QString("排序后输出，当前排序第")<<lie <<QString("列")<<"\r\n";
-        stream<<"\t";
-        for(int j=0;j<this->list.s.size();j++)
-            stream<<this->list.s.at(j)<<"\t";
-        stream<<"\r\n";
-        for(int i=0;i<this->data.size();i++)
-        {
-            for(int j=0;j<this->list.s.size();j++)
-                stream<<this->data.at(i).s.at(j)<<"\t";
-            stream<<"\r\n";
-        }
-        stream<<"--------------------------------------------------------------"<<"\r\n";
-        file.close();
     }
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
