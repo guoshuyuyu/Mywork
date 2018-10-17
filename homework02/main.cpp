@@ -3,7 +3,7 @@
 #include <QVector>
 #include <QTextStream>
 #include <QFile>
-
+#define N 4
 namespace SK {
 enum SortKind{
     col01    =   0x00000001<<0,         //!< 第1列
@@ -43,12 +43,14 @@ enum SortKind{
 
 
 typedef struct{
-    QStringList stud;
+    QString num;
+    QString name;
+    QVector<int> score;
 } studData;
 
 QDebug operator<< (QDebug d, const studData &data) {
-    for(int i=0;i<data.stud.size();i++)
-        d.noquote().nospace()<<QString(data.stud.at(i))<<endl;
+    QDebugStateSaver saver(d);
+    d.nospace()<<data.num<<" "<<data.name<<" "<<data.score;
     return d;
 }
 
@@ -66,38 +68,20 @@ bool myCmp::operator()(const studData &d1, const studData &d2)
     bool result = false;
     quint32 sortedColumn = 0x00000001<<currentColumn;
     switch (sortedColumn) {
-    case SK::col01:result=d1.stud.at(1)>d2.stud.at(1);break;
-    case SK::col02:result=d1.stud.at(2)>d2.stud.at(2);break;
-    case SK::col03:result=d1.stud.at(3)>d2.stud.at(3);break;
-    case SK::col04:result=d1.stud.at(4)>d2.stud.at(4);break;
-    case SK::col05:result=d1.stud.at(5)>d2.stud.at(5); break;
-    case SK::col06:result=d1.stud.at(6)>d2.stud.at(6);break;
-    case SK::col07:result=d1.stud.at(7)>d2.stud.at(7);break;
-    case SK::col08:result=d1.stud.at(8)>d2.stud.at(8);break;
-    case SK::col09:result=d1.stud.at(9)>d2.stud.at(9);break;
-    case SK::col10:result=d1.stud.at(10)>d2.stud.at(10);break;
-    case SK::col11:result=d1.stud.at(11)>d2.stud.at(11);break;
-    case SK::col12:result=d1.stud.at(12)>d2.stud.at(12);break;
-    case SK::col13:result=d1.stud.at(13)>d2.stud.at(13);break;
-    case SK::col14:result=d1.stud.at(14)>d2.stud.at(14);break;
-    case SK::col15:result=d1.stud.at(15)>d2.stud.at(15);break;
-    case SK::col16:result=d1.stud.at(16)>d2.stud.at(16);break;
-    case SK::col17:result=d1.stud.at(17)>d2.stud.at(17);break;
-    case SK::col18:result=d1.stud.at(18)>d2.stud.at(18);break;
-    case SK::col19:result=d1.stud.at(19)>d2.stud.at(19);break;
-    case SK::col20:result=d1.stud.at(20)>d2.stud.at(20);break;
-    case SK::col21:result=d1.stud.at(21)>d2.stud.at(21);break;
-    case SK::col22:result=d1.stud.at(22)>d2.stud.at(22);break;
-    case SK::col23:result=d1.stud.at(23)>d2.stud.at(23);break;
-    case SK::col24:result=d1.stud.at(24)>d2.stud.at(24);break;
-    case SK::col25:result=d1.stud.at(25)>d2.stud.at(25);break;
-    case SK::col26:result=d1.stud.at(26)>d2.stud.at(26);break;
-    case SK::col27:result=d1.stud.at(27)>d2.stud.at(27);break;
-    case SK::col28:result=d1.stud.at(28)>d2.stud.at(28);break;
-    case SK::col29:result=d1.stud.at(29)>d2.stud.at(29);break;
-    case SK::col30:result=d1.stud.at(30)>d2.stud.at(30);break;
-    case SK::col31:result=d1.stud.at(31)>d2.stud.at(31);break;
-    case SK::col32:result=d1.stud.at(32)>d2.stud.at(32);break;
+    case SK::col01:
+        if(d1.name>=d2.name)
+            result = false;
+        else
+            result = true;
+        break;
+    case SK::col02:
+        if(d1.num>=d2.num)
+            result = false;
+        else
+            result = true;
+        break;
+    default:
+        result=(d1.score.at(currentColumn-3)<(d2.score.at(currentColumn-3)))
     }
     return result;
 }
@@ -107,20 +91,57 @@ class ScoreSorter
 {
 public:
     ScoreSorter(QString dataFile);
-    void doSort();
-    void readFile();
+    doSort();
+    readFile();
+    QByteArray line;
 private:
-    Qstring Filepath;
+    QString tempFile;
+    QVector<studData> student;
 }
 
-ScoreSorter::ScoreSorter(QString dataFile){
-
+ ScoreSorter::ScoreSorter(QString dataFile)
+{
+    tempFile=dataFile;
 }
-
-
+ScoreSorter::doSort(){
+    myCmp bigger(N);
+    std::sort(student.begin(),student.end(),bigger);
+    qDebug()<<"排序后输出，当前排序第"<<N<<"列："；
+    qDebug()<<student;
+    qDebug()<<"--------------------------------------------------------\n";
+}
+ScoreSorter::readFile(){
+    QFile file(tempFile);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        qDebug()<<QString("文件打开失败").arg(tempFile);
+    return -1;
+    while(!file.atEnd()){
+        QString line=in.readLine();
+        qDebug()<<line
+    }
+                  file.close();
+        qDebug().noquote().nospace()<<"文件读取完成："<<tempFile;
+    }
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    // 自定义qDebug
+    QFile *gFileLog=NULL;
+    QMessageLogger *gMlog=NULL;
+    char *msgHead[]={
+        "Debug",
+        "Warning",
+        "Critical",
+        "Fatal",
+        "Info",
+    };
+    QByteArray localMsg = msg.toLocal8Bit();
+    if(gFileLog){
+        QTextStream tWrite(gFileLog);
+        QString msgText="%1 | %6 | %2:%3, %4 | %5\n";
+        msgText=msgText.arg(msgHead[type]).arg(context.file).arg(context.function).arg(localMsg.constData());
+        tWrite<<msgText;
+    }else{
+        fprintf(stderr,"%s | %s | %s:%u, %s | %s\n",msgHead[type],context.line,context.function,localMsg.constData());
+    }
 }
 
 int main()
