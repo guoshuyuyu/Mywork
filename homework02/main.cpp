@@ -96,9 +96,8 @@ public:
     QByteArray line;
 private:
     QString tempFile;
-    QVector<studData> student;
-    studData list;
     QList<studData> data;
+    studData list;
 };
 
  ScoreSorter::ScoreSorter(QString dataFile)
@@ -106,49 +105,75 @@ private:
     tempFile=dataFile;
 }
 void ScoreSorter::doSort(){
-    for(int i=1;i<this->list.stud.size();i++){
-    myCmp cmp(i-1);
-    std::sort(this->data.begin(),this->data.end(),cmp );
-    qDebug()<<"排序后输出，当前排序第"<<i+1<<"列";
-    qDebug() << ""<< (this->list)<<"\t";
-    for(int i=0;i<this->data.size();i++)
-    qDebug() << this->data.at(i)<<"\t";
-    qDebug()<<"-------------------------------------\n";
+    myCmp cmp(i-2);
+    qDebug()<<"排序后输出，当前排序第"<<i<<"列";
+    std::sort(stud.begin(),stud.end(),cmp);
+    line.removeLast();
+    qDebug().nospace().noquote()<<line;
+    for(int a=0;a<stud.size();a++)
+        qDebug()<<stud.at(a);
+    qDebug()<<"-------------------------------------"<<endl;
+
     }
 }
 
 void ScoreSorter::readFile(){
     QFile file(tempFile);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        qDebug()<<QString("文件打开失败").arg(tempFile);
-    }
-    while(!file.atEnd()){
-        QString line=file.readLine();
-        qDebug()<<line;
-    }
-                  file.close();
-        qDebug().noquote().nospace()<<"文件读取完成："<<tempFile;
+        if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qDebug()<<"无法打开该文件!";
+           }
+        QString titile(file.readLine());
+             this->list.stud = titile.split(" ", QString::SkipEmptyParts);
+             if((this->list.stud).last() == "\n") this->list.stud.removeLast();
+             studData lastdata;
+             while(!file.atEnd()) {
+                 QByteArray line = file.readLine();
+                 QString str(line);
+                 lastdata.stud = str.split(" ", QString::SkipEmptyParts);
+                 if((lastdata.stud).last() == "\n") lastdata.stud.removeLast();
+                 if(lastdata.stud.size()==0) continue;
+                 this->data.append(lastdata);
+             }
+             file.close();
     }
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    QFile *gFileLog=NULL;
-    QMessageLogger *gMlog=NULL;
-    char *msgHead[]={
-        "Debug",
-        "Warning",
-        "Critical",
-        "Fatal",
-        "Info",
-    };
-    QByteArray localMsg = msg.toLocal8Bit();
-    if(gFileLog){
-        QTextStream tWrite(gFileLog);
-        QString msgText="%1 | %6 | %2:%3, %4 | %5\n";
-        msgText=msgText.arg(msgHead[type]).arg(context.file).arg(context.function).arg(localMsg.constData());
-        tWrite<<msgText;
-    }else{
-        fprintf(stderr,"%s | %s | %s:%u, %s | %s\n",msgHead[type],context.line,context.function,localMsg.constData());
-    }
+//    QFile *gFileLog=NULL;
+//    QMessageLogger *gMlog=NULL;
+//    char *msgHead[]={
+//        "Debug",
+//        "Warning",
+//        "Critical",
+//        "Fatal",
+//        "Info",
+//    };
+//    QByteArray localMsg = msg.toLocal8Bit();
+//    if(gFileLog){
+//        QTextStream tWrite(gFileLog);
+//        QString msgText="%1 | %6 | %2:%3, %4 | %5\n";
+//        msgText=msgText.arg(msgHead[type]).arg(context.file).arg(context.function).arg(localMsg.constData());
+//        tWrite<<msgText;
+//    }else{
+ //       fprintf(stderr,"%s | %s | %s:%u, %s | %s\n",msgHead[type],context.line,context.function,localMsg.constData());
+ //   }
+QByteArray localMsg = msg.toLocal8Bit();
+        switch (type) {
+        case QtDebugMsg:
+            fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtInfoMsg:
+            fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtWarningMsg:
+            fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtCriticalMsg:
+            fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            break;
+        case QtFatalMsg:
+            fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+            abort();
+        }
 }
 
 int main()
