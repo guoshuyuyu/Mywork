@@ -144,14 +144,12 @@ void CenterFrame::createUserCommandArea()
     imgBtn->setToolTip("绘制图片");
     imgBtn->setCheckable(true);
     imgBtn->setIconSize(p.size());
-    QImage image(":/new/prefix1/users");
-    QRect targetRect(5,5,20,20);
+    QImage image(":/user");
+    QRect targetRect(0,0,p.size().width(),p.size().height());
     QRect sourceRect=image.rect();
     painter.drawImage(targetRect,image,sourceRect);
-
     imgBtn->setIcon (QIcon(p));
-    connect(imgBtn,&QPushButton::clicked,this, &CenterFrame::photoset);
-
+    connect(imgBtn,&QPushButton::clicked,this, &CenterFrame::on_btnchoseimageClicked);
     // 选项Group布局
     QGridLayout *gridLayout = new QGridLayout();
     gridLayout->addWidget(btnRect,0,0);
@@ -165,7 +163,6 @@ void CenterFrame::createUserCommandArea()
     gridLayout->setSpacing(3);
     group->setLayout(gridLayout);
 }
-
 
 void CenterFrame::createUI()
 {
@@ -356,4 +353,16 @@ void CenterFrame::on_btnDiamondClicked()
     }
     else
         drawWidget->setShapeType(ST::None);
+}
+void CenterFrame::on_btnchoseimageClicked()   //使点击图片按钮后可以选择图片
+ {
+      if(imgBtn->isChecked())
+          {
+              drawWidget->setShapeType(ST::picture);
+              drawWidget->choseimage();
+              updateButtonStatus();
+          }
+          else
+          {
+              drawWidget->setShapeType(ST::None);
 }
